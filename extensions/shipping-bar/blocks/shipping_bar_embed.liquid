@@ -1,0 +1,182 @@
+{% comment %}
+  CartBoost - Shipping Bar (App Embed with Universal Flexible Placement)
+  Can be placed at Top of Page, Sticky Top, Cart Drawer, or any Custom CSS Selector
+{% endcomment %}
+
+{{ 'cartboost.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cartboost.js' | asset_url }}" defer="defer"></script>
+
+{% assign app_config = app.metafields.config.value %}
+{% if app_config == blank %}
+  {% assign app_config = shop.metafields['$app']['config'].value %}
+{% endif %}
+
+{% if app_config != blank %}
+  {% assign is_enabled = app_config.enabled %}
+  {% assign threshold = app_config.threshold | default: block.settings.threshold | default: 50 %}
+  {% assign message = app_config.message | default: block.settings.message | default: "You're {amount} away from FREE shipping!" %}
+  {% assign success_message = app_config.successMessage | default: block.settings.success_message | default: "Congratulations! You've unlocked FREE shipping!" %}
+  {% assign empty_message = app_config.emptyMessage | default: block.settings.empty_message | default: "Free shipping on orders over {amount}!" %}
+  {% assign bar_color = app_config.barColor | default: block.settings.bar_color | default: "#108043" %}
+  {% assign bar_bg_color = app_config.barBgColor | default: block.settings.bar_bg_color | default: "#e0e0e0" %}
+  {% assign text_color = app_config.textColor | default: block.settings.text_color | default: "#202223" %}
+  {% assign banner_bg_color = block.settings.banner_bg_color | default: "#f4f6f8" %}
+  {% assign bar_height = app_config.barHeight | default: block.settings.bar_height | default: 8 %}
+  {% assign bar_shape = app_config.barShape | default: block.settings.bar_shape | default: "rounded" %}
+{% else %}
+  {% assign is_enabled = true %}
+  {% assign threshold = block.settings.threshold | default: 50 %}
+  {% assign message = block.settings.message | default: "You're {amount} away from FREE shipping!" %}
+  {% assign success_message = block.settings.success_message | default: "Congratulations! You've unlocked FREE shipping!" %}
+  {% assign empty_message = block.settings.empty_message | default: "Free shipping on orders over {amount}!" %}
+  {% assign bar_color = block.settings.bar_color | default: "#108043" %}
+  {% assign bar_bg_color = block.settings.bar_bg_color | default: "#e0e0e0" %}
+  {% assign text_color = block.settings.text_color | default: "#202223" %}
+  {% assign banner_bg_color = block.settings.banner_bg_color | default: "#f4f6f8" %}
+  {% assign bar_height = block.settings.bar_height | default: 8 %}
+  {% assign bar_shape = block.settings.bar_shape | default: "rounded" %}
+{% endif %}
+
+{% assign placement_mode = block.settings.placement_mode | default: "top_universal" %}
+{% assign is_sticky = false %}
+{% if placement_mode == "sticky_top" %}
+  {% assign is_sticky = true %}
+{% endif %}
+
+{% unless is_enabled == false %}
+<div
+  class="cb-shipping-bar cb-shipping-bar--embed{% if is_sticky %} cb-shipping-bar--sticky{% endif %}{% if placement_mode == 'cart_drawer' %} cb-shipping-bar--drawer{% endif %}"
+  data-cb-shipping-bar
+  data-cb-placement="{{ placement_mode | escape }}"
+  data-cb-custom-selector="{{ block.settings.custom_css_selector | escape }}"
+  data-cb-insertion="{{ block.settings.insertion_position | default: 'prepend' | escape }}"
+  data-cb-threshold="{{ threshold | escape }}"
+  data-cb-message="{{ message | escape }}"
+  data-cb-success-message="{{ success_message | escape }}"
+  data-cb-empty-message="{{ empty_message | escape }}"
+  style="--cb-bar-color: {{ bar_color | escape }}; --cb-bar-bg-color: {{ bar_bg_color | escape }}; --cb-text-color: {{ text_color | escape }}; --cb-banner-bg: {{ banner_bg_color | escape }}; --cb-bar-height: {{ bar_height | escape }}px;"
+>
+  <div class="cb-shipping-bar__container">
+    <div class="cb-shipping-bar__message" role="status" aria-live="polite"></div>
+    <div class="cb-shipping-bar__progress-track cb-shipping-bar__progress-track--{{ bar_shape }}">
+      <div
+        class="cb-shipping-bar__progress-fill"
+        role="progressbar"
+        aria-valuenow="0"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        style="width: 0%;"
+      ></div>
+    </div>
+  </div>
+</div>
+{% endunless %}
+
+{% schema %}
+{
+  "name": "🚚 Shipping Bar Embed",
+  "target": "body",
+  "settings": [
+    {
+      "type": "select",
+      "id": "placement_mode",
+      "label": "Placement Location",
+      "options": [
+        { "value": "top_universal", "label": "Top of Page (Universal Banner)" },
+        { "value": "sticky_top", "label": "Sticky Top (Floats while scrolling)" },
+        { "value": "cart_drawer", "label": "Inside Cart Drawer / Slide-out Cart" },
+        { "value": "custom_selector", "label": "Custom CSS Selector (Place anywhere)" }
+      ],
+      "default": "top_universal",
+      "info": "Choose where this progress bar should be placed on your storefront."
+    },
+    {
+      "type": "text",
+      "id": "custom_css_selector",
+      "label": "Custom CSS Selector",
+      "placeholder": ".cart-drawer__header, .header, .cart__footer",
+      "info": "Used when 'Custom CSS Selector' is selected above. Matches any theme element."
+    },
+    {
+      "type": "select",
+      "id": "insertion_position",
+      "label": "Insertion Position",
+      "options": [
+        { "value": "prepend", "label": "Inside at Top (First Child)" },
+        { "value": "append", "label": "Inside at Bottom (Last Child)" },
+        { "value": "before", "label": "Directly Before Target Element" },
+        { "value": "after", "label": "Directly After Target Element" }
+      ],
+      "default": "prepend"
+    },
+    {
+      "type": "number",
+      "id": "threshold",
+      "label": "Free shipping threshold",
+      "default": 50
+    },
+    {
+      "type": "text",
+      "id": "message",
+      "label": "Progress message",
+      "default": "You're {amount} away from FREE shipping!"
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Success message",
+      "default": "Congratulations! You've unlocked FREE shipping!"
+    },
+    {
+      "type": "text",
+      "id": "empty_message",
+      "label": "Empty cart message",
+      "default": "Free shipping on orders over {amount}!"
+    },
+    {
+      "type": "color",
+      "id": "bar_color",
+      "label": "Progress bar color",
+      "default": "#108043"
+    },
+    {
+      "type": "color",
+      "id": "bar_bg_color",
+      "label": "Bar background color",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#202223"
+    },
+    {
+      "type": "color",
+      "id": "banner_bg_color",
+      "label": "Banner background color",
+      "default": "#f4f6f8"
+    },
+    {
+      "type": "range",
+      "id": "bar_height",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Bar height",
+      "default": 8
+    },
+    {
+      "type": "select",
+      "id": "bar_shape",
+      "label": "Bar corners",
+      "options": [
+        { "value": "rounded", "label": "Rounded" },
+        { "value": "square", "label": "Square" }
+      ],
+      "default": "rounded"
+    }
+  ]
+}
+{% endschema %}

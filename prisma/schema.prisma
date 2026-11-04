@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+model Settings {
+  id              String   @id @default(cuid())
+  shop            String   @unique
+  enabled         Boolean  @default(true)
+  thresholdAmount Float    @default(50.0)
+  message         String   @default("You're {amount} away from FREE shipping!")
+  successMessage  String   @default("Congratulations! You've unlocked FREE shipping!")
+  emptyMessage    String   @default("Free shipping on orders over {amount}!")
+  barColor        String   @default("#108043")
+  barBgColor      String   @default("#e0e0e0")
+  textColor       String   @default("#202223")
+  barHeight       Int      @default(8)
+  barShape        String   @default("rounded")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model DiscountOffer {
+  id                   String   @id @default(cuid())
+  shop                 String
+  shopifyDiscountId    String?
+  title                String   @default("Buy 2 Get 1 FREE")
+  buyQuantity          Int      @default(2)
+  getQuantity          Int      @default(1)
+  discountPercentage   Float    @default(100.0)
+  appliesToAll         Boolean  @default(true)
+  eligibleProductIds   String   @default("[]")
+  sameProductOnly      Boolean  @default(false)
+  combinesWithOrder    Boolean  @default(true)
+  combinesWithProduct  Boolean  @default(true)
+  combinesWithShipping Boolean  @default(true)
+  status               String   @default("ACTIVE")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}

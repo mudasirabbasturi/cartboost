@@ -1,0 +1,295 @@
+{% comment %}
+  CartBoost - Product Page BOGO Offer Callout Block
+  Supports multi-offer matching, selection by index or title, and custom styling
+{% endcomment %}
+
+{{ 'cartboost.css' | asset_url | stylesheet_tag }}
+
+{% assign app_config = app.metafields.config.value %}
+{% if app_config == blank %}
+  {% assign app_config = shop.metafields['$app']['config'].value %}
+{% endif %}
+
+{% assign bogo_offers = app_config.bogoOffers %}
+{% assign pid_str = product.id | append: "" %}
+{% assign pid_gid = "gid://shopify/Product/" | append: pid_str %}
+
+{% comment %} Collect all eligible active offers for this product {% endcomment %}
+{% assign matching_indices = "" %}
+{% if bogo_offers != blank and bogo_offers.size > 0 %}
+  {% for off in bogo_offers %}
+    {% if off.active %}
+      {% assign is_match = false %}
+      {% if off.appliesToAll %}
+        {% assign is_match = true %}
+      {% elsif product != blank and off.eligibleProductIds != blank %}
+        {% for el_id in off.eligibleProductIds %}
+          {% assign el_str = el_id | append: "" %}
+          {% if el_str == pid_str or el_str == pid_gid or el_str contains pid_str %}
+            {% assign is_match = true %}
+            {% break %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      {% if is_match %}
+        {% assign off_idx = forloop.index0 | append: "" %}
+        {% if matching_indices == "" %}
+          {% assign matching_indices = off_idx %}
+        {% else %}
+          {% assign matching_indices = matching_indices | append: "," | append: off_idx %}
+        {% endif %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% assign match_array = matching_indices | split: "," %}
+
+{% comment %} Determine which offer(s) to display based on block settings {% endcomment %}
+{% assign offers_to_render = "" %}
+{% assign sel_mode = block.settings.offer_selection | default: "auto" %}
+
+{% if sel_mode == 'manual' %}
+  {% assign offers_to_render = "manual" %}
+{% elsif sel_mode == 'all_offers' %}
+  {% if match_array.size > 0 and matching_indices != "" %}
+    {% assign offers_to_render = matching_indices %}
+  {% elsif bogo_offers != blank and bogo_offers.size > 0 %}
+    {% if request.design_mode %}
+      {% assign offers_to_render = "0" %}
+    {% endif %}
+  {% endif %}
+{% elsif sel_mode == 'offer_1' %}
+  {% if bogo_offers != blank and bogo_offers.size > 0 %}
+    {% assign offers_to_render = "0" %}
+  {% endif %}
+{% elsif sel_mode == 'offer_2' %}
+  {% if bogo_offers != blank and bogo_offers.size > 1 %}
+    {% assign offers_to_render = "1" %}
+  {% elsif bogo_offers != blank and bogo_offers.size > 0 %}
+    {% assign offers_to_render = "0" %}
+  {% endif %}
+{% elsif sel_mode == 'filter' %}
+  {% assign kw = block.settings.offer_keyword | downcase | strip %}
+  {% if bogo_offers != blank and bogo_offers.size > 0 %}
+    {% for off in bogo_offers %}
+      {% assign t_down = off.title | downcase %}
+      {% if t_down contains kw %}
+        {% assign idx_str = forloop.index0 | append: "" %}
+        {% assign offers_to_render = idx_str %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% else %}
+  {% comment %} 'auto' mode: Prioritize product-specific offer first, then storewide offer {% endcomment %}
+  {% assign chosen_idx = nil %}
+  {% if bogo_offers != blank and bogo_offers.size > 0 %}
+    {% for idx_str in match_array %}
+      {% if idx_str != "" %}
+        {% assign idx = idx_str | plus: 0 %}
+        {% assign cand = bogo_offers[idx] %}
+        {% if cand.appliesToAll == false %}
+          {% assign chosen_idx = idx_str %}
+          {% break %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+
+    {% if chosen_idx == nil and match_array.size > 0 and matching_indices != "" %}
+      {% assign chosen_idx = match_array[0] %}
+    {% endif %}
+
+    {% if chosen_idx == nil %}
+      {% if app_config.bogoOffer != blank and app_config.bogoOffer.active %}
+        {% assign chosen_idx = "0" %}
+      {% elsif request.design_mode and bogo_offers.size > 0 %}
+        {% assign chosen_idx = "0" %}
+      {% endif %}
+    {% endif %}
+  {% elsif app_config.bogoOffer != blank and app_config.bogoOffer.active %}
+    {% assign chosen_idx = "0" %}
+  {% endif %}
+
+  {% if chosen_idx != nil %}
+    {% assign offers_to_render = chosen_idx %}
+  {% endif %}
+{% endif %}
+
+{% assign render_list = offers_to_render | split: "," %}
+
+{% if offers_to_render != "" %}
+  {% for target in render_list %}
+    {% if target == "manual" %}
+      {% assign buy_qty = block.settings.buy_quantity | default: 2 %}
+      {% assign get_qty = block.settings.get_quantity | default: 1 %}
+      {% assign total_needed = buy_qty | plus: get_qty %}
+      {% if block.settings.headline != blank %}
+        {% assign headline_text = block.settings.headline %}
+      {% else %}
+        {% assign headline_text = "Special Offer: Buy " | append: buy_qty | append: " Get " | append: get_qty | append: " FREE!" %}
+      {% endif %}
+      {% if block.settings.subtitle != blank %}
+        {% assign sub_text = block.settings.subtitle %}
+      {% else %}
+        {% assign sub_text = "Add " | append: total_needed | append: " items to cart & get " | append: get_qty | append: " FREE at checkout!" %}
+      {% endif %}
+    {% else %}
+      {% assign target_idx = target | plus: 0 %}
+      {% assign current_offer = bogo_offers[target_idx] %}
+      {% if current_offer == nil and app_config.bogoOffer != blank %}
+        {% assign current_offer = app_config.bogoOffer %}
+      {% endif %}
+
+      {% if current_offer != nil %}
+        {% assign buy_qty = current_offer.buyX %}
+        {% assign get_qty = current_offer.getY %}
+        {% assign total_needed = buy_qty | plus: get_qty %}
+        {% if block.settings.headline != blank %}
+          {% assign headline_text = block.settings.headline %}
+        {% else %}
+          {% assign headline_text = current_offer.title %}
+        {% endif %}
+        {% if block.settings.subtitle != blank %}
+          {% assign sub_text = block.settings.subtitle %}
+        {% else %}
+          {% assign sub_text = "Add " | append: total_needed | append: " items to cart & get " | append: get_qty | append: " FREE at checkout!" %}
+        {% endif %}
+      {% else %}
+        {% assign headline_text = "Special Offer: Buy 2 Get 1 FREE!" %}
+        {% assign sub_text = "Add 3 items to cart & get 1 FREE at checkout!" %}
+      {% endif %}
+    {% endif %}
+
+    <div
+      class="cb-bogo-callout cb-bogo-callout--{{ block.settings.badge_style | default: 'card' | escape }}"
+      style="--cb-callout-bg: {{ block.settings.bg_color | default: '#f0f7f4' | escape }}; --cb-callout-border: {{ block.settings.border_color | default: '#108043' | escape }}; --cb-callout-text: {{ block.settings.text_color | default: '#1c5436' | escape }};"
+    >
+      {% if block.settings.icon != 'none' %}
+        <div class="cb-bogo-callout__icon">
+          {{ block.settings.icon | default: '🎁' | escape }}
+        </div>
+      {% endif %}
+      <div class="cb-bogo-callout__content">
+        <div class="cb-bogo-callout__title">
+          {{ headline_text | escape }}
+        </div>
+        <div class="cb-bogo-callout__subtitle">
+          {{ sub_text | escape }}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+{% elsif request.design_mode %}
+  <div
+    class="cb-bogo-callout cb-bogo-callout--card"
+    style="--cb-callout-bg: #fffbf0; --cb-callout-border: #e28704; --cb-callout-text: #6b4700;"
+  >
+    <div class="cb-bogo-callout__icon">💡</div>
+    <div class="cb-bogo-callout__content">
+      <div class="cb-bogo-callout__title">CartBoost Offer Badge (Theme Editor Preview)</div>
+      <div class="cb-bogo-callout__subtitle">
+        No active offer matches this product yet. Set "Offer Selection" to <strong>Offer 1</strong> or <strong>Manual</strong> in the sidebar to preview immediately!
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "🎁 BOGO Offer Badge",
+  "target": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "offer_selection",
+      "label": "Offer Selection",
+      "options": [
+        { "value": "auto", "label": "Automatic (Smart Match based on Product)" },
+        { "value": "all_offers", "label": "Show All Matching Offers" },
+        { "value": "offer_1", "label": "Offer 1 (Latest Active Offer)" },
+        { "value": "offer_2", "label": "Offer 2 (Second Active Offer)" },
+        { "value": "filter", "label": "Filter by Title Keyword" },
+        { "value": "manual", "label": "Custom Manual Deal" }
+      ],
+      "default": "auto",
+      "info": "Choose which CartBoost offer this badge should display."
+    },
+    {
+      "type": "text",
+      "id": "offer_keyword",
+      "label": "Filter Keyword (when Filter mode selected)",
+      "placeholder": "e.g. Snowboard or Buy 2",
+      "info": "Case-insensitive title match"
+    },
+    {
+      "type": "select",
+      "id": "badge_style",
+      "label": "Badge Layout Style",
+      "options": [
+        { "value": "card", "label": "Card (Featured Box with accent border)" },
+        { "value": "pill", "label": "Pill (Compact rounded badge)" },
+        { "value": "banner", "label": "Minimal Accent Banner" }
+      ],
+      "default": "card"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Custom Headline (Optional)",
+      "info": "Leave blank to automatically use the offer title from CartBoost Admin."
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Custom Subtitle (Optional)",
+      "info": "Leave blank to automatically generate the deal explanation."
+    },
+    {
+      "type": "number",
+      "id": "buy_quantity",
+      "label": "Buy Quantity (Manual Mode Only)",
+      "default": 2
+    },
+    {
+      "type": "number",
+      "id": "get_quantity",
+      "label": "Get Free Quantity (Manual Mode Only)",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "icon",
+      "label": "Badge Icon",
+      "options": [
+        { "value": "🎁", "label": "Gift Box 🎁" },
+        { "value": "🏷️", "label": "Discount Tag 🏷️" },
+        { "value": "🔥", "label": "Fire Deal 🔥" },
+        { "value": "✨", "label": "Sparkle ✨" },
+        { "value": "⭐", "label": "Star ⭐" },
+        { "value": "none", "label": "None" }
+      ],
+      "default": "🎁"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Badge Background Color",
+      "default": "#f0f7f4"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border & Accent Color",
+      "default": "#108043"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#1c5436"
+    }
+  ]
+}
+{% endschema %}
