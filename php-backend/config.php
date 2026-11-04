@@ -204,3 +204,4 @@ function verify_shopify_webhook(string $data, string $hmacHeader, string $secret
     $calculated = base64_encode(hash_hmac('sha256', $data, $secret, true));
     return hash_equals($hmacHeader, $calculated);
 }
+

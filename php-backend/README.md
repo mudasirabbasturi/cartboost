@@ -62,3 +62,4 @@ define('APP_URL', 'https://cartboost.yourdomain.com');
 | `index.php` | Merchant admin dashboard: Free Shipping progress bar settings, live preview, color pickers |
 | `offers.php` | BOGO manager: create, edit, pause, resume, and delete Buy X Get Y Free offers |
 | `webhooks.php` | HMAC-verified router for GDPR compliance (`customers/data_request`, `customers/redact`, `shop/redact`) |
+

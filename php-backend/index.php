@@ -405,3 +405,4 @@ $settings = $stmt->fetch() ?: [
   </script>
 </body>
 </html>
+

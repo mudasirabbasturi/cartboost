@@ -110,3 +110,4 @@ sync_storefront_metafield($pdo, $shop, $accessToken);
 $host = isset($params['host']) ? urlencode($params['host']) : '';
 header("Location: " . APP_URL . "/index.php?shop={$shop}&host={$host}");
 exit;
+

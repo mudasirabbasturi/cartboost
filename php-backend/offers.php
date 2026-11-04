@@ -382,3 +382,4 @@ $offers = $stmt->fetchAll();
   </div>
 </body>
 </html>
+
