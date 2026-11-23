@@ -36,7 +36,7 @@
 
 {% unless is_enabled == false %}
 <div
-  class="cb-shipping-bar cb-shipping-bar--block"
+  class="cb-shipping-bar cb-shipping-bar--block cb-shipping-bar--{{ block.settings.bar_style | default: 'standard' | escape }}"
   data-cb-shipping-bar
   data-cb-threshold="{{ threshold | escape }}"
   data-cb-message="{{ message | escape }}"
@@ -65,6 +65,18 @@
   "name": "🚚 Free Shipping Bar",
   "target": "section",
   "settings": [
+    {
+      "type": "select",
+      "id": "bar_style",
+      "label": "Bar Display Style",
+      "options": [
+        { "value": "standard", "label": "Standard Bar" },
+        { "value": "slim", "label": "Slim Micro-Line (Drawer-Safe 3px)" },
+        { "value": "minimal_text", "label": "Minimalist Text Only (No Bar)" }
+      ],
+      "default": "standard",
+      "info": "Use Slim or Minimalist Text inside cart drawers to prevent layout shifts."
+    },
     {
       "type": "number",
       "id": "threshold",

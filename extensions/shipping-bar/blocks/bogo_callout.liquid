@@ -119,7 +119,7 @@
 
 {% assign render_list = offers_to_render | split: "," %}
 
-{% if offers_to_render != "" %}
+{% if block.settings.enable_badge != false and offers_to_render != "" %}
   {% for target in render_list %}
     {% if target == "manual" %}
       {% assign buy_qty = block.settings.buy_quantity | default: 2 %}
@@ -202,6 +202,13 @@
   "target": "section",
   "settings": [
     {
+      "type": "checkbox",
+      "id": "enable_badge",
+      "label": "Enable BOGO Badge on Storefront",
+      "default": true,
+      "info": "Uncheck to completely hide this badge while keeping discounts active at checkout."
+    },
+    {
       "type": "select",
       "id": "offer_selection",
       "label": "Offer Selection",
@@ -230,7 +237,8 @@
       "options": [
         { "value": "card", "label": "Card (Featured Box with accent border)" },
         { "value": "pill", "label": "Pill (Compact rounded badge)" },
-        { "value": "banner", "label": "Minimal Accent Banner" }
+        { "value": "banner", "label": "Minimal Accent Banner" },
+        { "value": "inline", "label": "Inline Text Only (Zero box/drawer-safe)" }
       ],
       "default": "card"
     },

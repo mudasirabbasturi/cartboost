@@ -1,0 +1,16 @@
+{
+  "name": "cartboost-cloudflare-backend",
+  "version": "1.0.0",
+  "description": "Serverless Cloudflare Workers + D1 Backend for CartBoost Shopify App",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "d1:create": "wrangler d1 create cartboost_db",
+    "d1:init": "wrangler d1 execute cartboost_db --file=./schema.sql"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "wrangler": "^3.111.0"
+  }
+}

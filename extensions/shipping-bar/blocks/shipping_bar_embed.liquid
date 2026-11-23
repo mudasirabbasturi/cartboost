@@ -45,7 +45,7 @@
 
 {% unless is_enabled == false %}
 <div
-  class="cb-shipping-bar cb-shipping-bar--embed{% if is_sticky %} cb-shipping-bar--sticky{% endif %}{% if placement_mode == 'cart_drawer' %} cb-shipping-bar--drawer{% endif %}"
+  class="cb-shipping-bar cb-shipping-bar--embed{% if is_sticky %} cb-shipping-bar--sticky{% endif %}{% if placement_mode == 'cart_drawer' %} cb-shipping-bar--drawer{% endif %} cb-shipping-bar--{{ block.settings.bar_style | default: 'standard' | escape }}"
   data-cb-shipping-bar
   data-cb-placement="{{ placement_mode | escape }}"
   data-cb-custom-selector="{{ block.settings.custom_css_selector | escape }}"
@@ -77,6 +77,18 @@
   "name": "🚚 Shipping Bar Embed",
   "target": "body",
   "settings": [
+    {
+      "type": "select",
+      "id": "bar_style",
+      "label": "Bar Display Style",
+      "options": [
+        { "value": "standard", "label": "Standard Bar" },
+        { "value": "slim", "label": "Slim Micro-Line (Drawer-Safe 3px)" },
+        { "value": "minimal_text", "label": "Minimalist Text Only (No Bar)" }
+      ],
+      "default": "standard",
+      "info": "Use Slim or Minimalist Text inside cart drawers to prevent layout shifts."
+    },
     {
       "type": "select",
       "id": "placement_mode",
