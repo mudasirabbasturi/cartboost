@@ -7,8 +7,8 @@ SHOPIFY_API_KEY = "38b390284d1199e6cfc3cb637d8e1c44"
 SHOPIFY_SCOPES = "write_products,write_metaobjects,write_metaobject_definitions,write_discounts"
 SHOPIFY_API_VERSION = "2025-01"
 
-# Bind your Cloudflare D1 Database (Run: npx wrangler d1 create cartboost_db)
+# Cloudflare D1 Database
 [[d1_databases]]
 binding = "DB"
 database_name = "cartboost_db"
-database_id = "cartboost_db_id"
+database_id = "53feea1b-5a42-4c8d-9c3e-c97be0b8c354"
