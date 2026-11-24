@@ -1,0 +1,19 @@
+{% comment %}
+  CartBoost - BOGO Offer Callout Badge for Product Pages
+  Place this in: snippets/bogo-callout-badge.liquid
+  Usage: {% render 'bogo-callout-badge', text: '🔥 Buy 2 Get 1 FREE - Automatic Discount at Checkout' %}
+{% endcomment %}
+
+{% assign badge_text = text | default: '🔥 Special Offer: Buy 2 Get 1 FREE!' %}
+{% assign badge_bg = bg_color | default: '#f0f7f4' %}
+{% assign badge_border = border_color | default: '#108043' %}
+{% assign badge_text_c = text_color | default: '#1c5436' %}
+
+<div
+  class="cb-bogo-callout cb-bogo-callout--inline"
+  style="--cb-callout-bg: {{ badge_bg }}; --cb-callout-border: {{ badge_border }}; --cb-callout-text: {{ badge_text_c }};"
+>
+  <div class="cb-bogo-callout__content">
+    <span class="cb-bogo-callout__title">{{ badge_text }}</span>
+  </div>
+</div>

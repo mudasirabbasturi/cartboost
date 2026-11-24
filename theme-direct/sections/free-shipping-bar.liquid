@@ -1,0 +1,127 @@
+{% comment %}
+  CartBoost - Direct Theme Section: Free Shipping Bar
+  Place this in: sections/free-shipping-bar.liquid
+{% endcomment %}
+
+{{ 'cartboost.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cartboost.js' | asset_url }}" defer="defer"></script>
+
+{% if section.settings.enabled %}
+<div
+  class="cb-shipping-bar cb-shipping-bar--section cb-shipping-bar--{{ section.settings.bar_style | default: 'standard' | escape }}"
+  data-cb-shipping-bar
+  data-cb-threshold="{{ section.settings.threshold | escape }}"
+  data-cb-message="{{ section.settings.message | escape }}"
+  data-cb-success-message="{{ section.settings.success_message | escape }}"
+  data-cb-empty-message="{{ section.settings.empty_message | escape }}"
+  style="--cb-bar-color: {{ section.settings.bar_color | escape }}; --cb-bar-bg-color: {{ section.settings.bar_bg_color | escape }}; --cb-text-color: {{ section.settings.text_color | escape }}; --cb-bar-height: {{ section.settings.bar_height | escape }}px;"
+>
+  <div class="cb-shipping-bar__container">
+    <div class="cb-shipping-bar__message" role="status" aria-live="polite">
+      {{ section.settings.message | replace: '{amount}', '$50.00' | escape }}
+    </div>
+    <div class="cb-shipping-bar__progress-track cb-shipping-bar__progress-track--{{ section.settings.bar_shape | escape }}">
+      <div
+        class="cb-shipping-bar__progress-fill"
+        role="progressbar"
+        aria-valuenow="0"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        style="width: 0%;"
+      ></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "🚚 Free Shipping Bar",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable Free Shipping Bar",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "bar_style",
+      "label": "Bar Style",
+      "options": [
+        { "value": "standard", "label": "Standard Bar" },
+        { "value": "slim", "label": "Slim Micro-Line (3px Drawer-Safe)" },
+        { "value": "minimal_text", "label": "Minimalist Text Only (No Bar)" }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "number",
+      "id": "threshold",
+      "label": "Free Shipping Threshold ($)",
+      "default": 50
+    },
+    {
+      "type": "text",
+      "id": "message",
+      "label": "Progress Message",
+      "default": "You're {amount} away from FREE shipping!"
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Unlocked Message",
+      "default": "🎉 Congratulations! You've unlocked FREE shipping!"
+    },
+    {
+      "type": "text",
+      "id": "empty_message",
+      "label": "Empty Cart Message",
+      "default": "Free shipping on all orders over {amount}!"
+    },
+    {
+      "type": "color",
+      "id": "bar_color",
+      "label": "Progress Bar Color",
+      "default": "#108043"
+    },
+    {
+      "type": "color",
+      "id": "bar_bg_color",
+      "label": "Progress Bar Background",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#202223"
+    },
+    {
+      "type": "range",
+      "id": "bar_height",
+      "min": 2,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Bar Height",
+      "default": 6
+    },
+    {
+      "type": "select",
+      "id": "bar_shape",
+      "label": "Bar Corners",
+      "options": [
+        { "value": "rounded", "label": "Rounded" },
+        { "value": "square", "label": "Square" }
+      ],
+      "default": "rounded"
+    }
+  ],
+  "presets": [
+    {
+      "name": "🚚 Free Shipping Bar"
+    }
+  ]
+}
+{% endschema %}
